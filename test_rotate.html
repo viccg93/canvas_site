@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>test rotate</title>
+    <link rel="stylesheet" href="bulma.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <h3>animaciones basicas</h3>
+        </div>
+        <div id="canvasContainer"></div>
+    </div>
+    <script>
+        let container = document.getElementById('canvasContainer');
+        for (let i = 0; i<60;i++){
+            let canvasAct = document.createElement('canvas');
+            canvasAct.width = 200;
+            canvasAct.height = 200;
+            let ctx = canvasAct.getContext('2d');
+            ctx.translate(100,100);
+            ctx.fillText((i+1),0,0);
+            ctx.arc(0,0,50,0,(Math.PI*2),false);
+            ctx.stroke();
+            let anguloTierra = (Math.PI*2/60) * i;
+            let anguloLuna = (Math.PI*2/6) * i;
+            ctx.rotate(anguloTierra);
+            ctx.fillRect(0,0,50,5);
+            ctx.translate(50,0);
+            ctx.fillStyle = 'blue';
+            ctx.beginPath();
+            ctx.fillRect(0,0,20,2);
+            ctx.rotate(anguloLuna);
+            ctx.fillStyle = 'red';
+            ctx.beginPath();
+            ctx.fillRect(0,0,20,2);
+            ctx.arc(10,0,2,0,(Math.PI*2),false);
+            ctx.stroke();
+            container.appendChild(canvasAct);
+        }
+
+    </script>
+</body>
+</html>

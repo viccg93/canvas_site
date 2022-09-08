@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>composicion y clipping</title>
+    <link rel="stylesheet" href="bulma.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <h3>composicion y clipping</h3>
+            <p>
+                cuando se dibuja una forma, por defecto lo hace por encima de otras formas (en caso de que existan) que
+                coinciden con el espacio de la la forma que se esta dibujando.
+
+                Este comportamiento por defecto se puede modificar mediante la propiedad 
+                
+                <pre>
+                    <code>globalCompositeOperation</code>
+                </pre>
+
+                tambien contamos con la propiedad clip que permite ocultar partes de formas que no queremos que sean visibles
+
+                <pre>
+                    <code>
+                        clip
+                    </code>
+                </pre>
+            </p>
+            <h3>ejemplo de global composition</h3>
+            <p id="methodDesc">selecciona un enlace para ver los efectos del composite seleccionado</p>
+            <div id="canvasContainer"></div>
+            <ul id="listCompisitionValues">
+            </ul>
+            <h3>clip</h3>
+            <p>
+                clipping path puede lograr un efecto muy similar a lo que se obtiene con <code>globalCompositeOperation</code>
+                sobre todo en las operacions in, out y atop. con la diferencia de que clipping path no dibuja una figura.
+
+                una forma de ver el uso de <code>clip()</code> es como una delimitacion de lo que sera visible en el canvas.
+
+                de esta manera completamos las tres operaciones de cierre:
+                <pre>
+                    <code>
+                        stroke()
+                        fill()
+                        clip()
+                    </code>
+                </pre>
+
+                <code>clip()</code> cerrara el path que se dibuje marcando dicho path como una area de clipping.
+            </p>
+
+            <canvas id="canvasClipping" width="200" height="200"></canvas>
+        </div>
+    </div>
+    
+    <script>
+        const compositionValues = [ {id:'source-over',desc:'comportamiento default'},
+                                    {id:'source-in',desc:'dibuja la nueva forma donde las formas se sobreponen'},
+                                    {id:'source-out',desc:'dibuja la nueva forma donde no se sobreponen'},
+                                    {id:'source-atop',desc:'dibuja la nueva figura donde se sobrepone con la existente'},
+                                    {id:'destination-over',desc:'la nueva figura se dibuja debajo de la existente'},
+                                    {id:'destination-in',desc:'se mantiene la figura existente donde se sobrepone con la nueva'},
+                                    {id:'destination-out',desc:'se mantiene la figura existente donde no se sobrepone con la nueva'},
+                                    {id:'destination-atop',desc:'se mantiene la figura original donde colapsa y la nueva se dibuja detras'},
+                                    {id:'lighter',desc:'donde se sobreponen las figuras se suman los colores'},
+                                    {id:'copy',desc:'solo deja la figura nueva'},
+                                    {id:'xor',desc:'dibuja las figuras donde no colapsan'},
+                                    {id:'multiply',desc:'los pixeles de la capa superior se multiplican con los de la inferior, mas obscura'},
+                                    {id:'screen',desc:'opuesto de multiply'},
+                                    {id:'overlay',desc:'combinacion de multiply y screen, claros mas claros y obscuros mas obscuros'},
+                                    {id:'darken',desc:'mantiene los pixeles mas oscuros'},
+                                    {id:'lighten',desc:'mantiene los pixeles mas claros'},
+                                    {id:'color-dodge',desc:'divide la capa inferior por la capa superior invertida'},
+                                    {id:'color-burn',desc:'divide la capa inferior invertida por la superior, despues invierte el resultado'},
+                                    {id:'hard-light',desc:'como overlay pero con las capas giradas'},
+                                    {id:'soft-light',desc:'version suave de hard-light, blanco o negro puro no resultan en b/n puro'},
+                                    {id:'difference',desc:'substrae la capa del fondo de la superior'},
+                                    {id:'exclusion',desc:'como difference pero en contraste bajo'},
+                                    {id:'hue',desc:'mantiene el luma y chroma de la capa del fondo y adapta el hue de la capa superior'},
+                                    {id:'saturation',desc:'mantiene el luma y hue de la capa del fondo y adapta el chroma de la capa superior'},
+                                    {id:'color',desc:'mantiene el luma de la capa del fondo y adapta el hue y chroma de la capa superior'},
+                                    {id:'luminosity',desc:'mantiene el hue y chroma de la capa del fondo y adapta el luma de la capa superior'}
+        ];
+
+        const canvasPrevContent = document.createElement('canvas');
+        const canvasNewContent = document.createElement('canvas');
+        const canvasComposited = document.createElement('canvas');
+        const methodDescParagraph = document.getElementById('methodDesc');
+        
+        function printValueList(listElement){
+            compositionValues.forEach((value,index)=>{
+                let liElement = document.createElement('li');
+                let aElement = document.createElement('a');
+                aElement.id = value.id;
+                aElement.text= value.id;
+                aElement.addEventListener('click',()=>{
+                    doComposite(value.id);
+                    methodDescParagraph.textContent = value.desc;
+                });
+                liElement.appendChild(aElement);
+                listElement.appendChild(liElement);
+            });
+        }
+
+        function initializeCompositeGUI(){
+            let listElement = document.getElementById('listCompisitionValues');
+            printValueList(listElement);
+            createBaseCanvas(canvasPrevContent,75,'rgba(0,0,255,1)');
+            createBaseCanvas(canvasNewContent,125,'rgba(255,0,0,1)');
+            canvasComposited.width= 200;
+            canvasComposited.height=200;
+            addCanvasToDOM(document.getElementById('canvasContainer'),[canvasPrevContent,canvasNewContent,canvasComposited]);
+        }
+
+        function createBaseCanvas(canvas, xPos,color){
+            canvas.width = 200;
+            canvas.height = 200;
+            let ctx = canvas.getContext('2d');
+            ctx.fillStyle = color;
+            ctx.arc(xPos,100,50,0,Math.PI*2,false);
+            ctx.fill();
+        }
+
+        function addCanvasToDOM(parent,canvasArr){
+            canvasArr.forEach((element)=>{
+                parent.appendChild(element);
+            });
+        }
+
+        function doComposite(method){
+            let ctx = canvasComposited.getContext('2d');
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.clearRect(0,0,200,200);
+            ctx.drawImage(canvasPrevContent,0,0);
+            ctx.globalCompositeOperation = method;
+            ctx.drawImage(canvasNewContent,0,0);
+        }
+
+        function doClipping(){
+            let canvasClipping = document.getElementById('canvasClipping');
+            let ctx = canvasClipping.getContext('2d');
+            let canvasWidth = canvasClipping.width;
+            let canvasHeight = canvasClipping.height;
+            let clipRadius = 75;
+            ctx.fillRect(0,0,canvasWidth,canvasHeight);
+            createCircularClipping(ctx,canvasWidth/2,canvasHeight/2,75);
+            createBackground(ctx,canvasWidth,canvasHeight);
+            createStarryNight(ctx,clipRadius,200);
+        }
+
+        function createCircularClipping(ctx,xPos,yPos,radius){
+            ctx.translate(xPos,yPos);
+            ctx.beginPath();
+            ctx.arc(0,0,radius,0,Math.PI*2,false);
+            ctx.clip();
+        }
+
+        function createBackground(ctx,canvasWidth,canvasHeight){
+            ctx.save();
+            ctx.resetTransform();
+            let skyGradient = ctx.createLinearGradient(0,0,0,canvasHeight);
+            skyGradient.addColorStop(0, '#232256');
+            skyGradient.addColorStop(1, '#143778');
+            ctx.fillStyle = skyGradient;
+            ctx.fillRect(0,0,canvasWidth,canvasHeight);
+            ctx.restore();
+        }
+
+        function drawStar(ctx, size) {
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(size, 0);
+            for (var i = 0; i < 9; i++) {
+                ctx.rotate(Math.PI / 5);
+                if (i % 2 === 0) {
+                    ctx.lineTo((size / 0.525731) * 0.200811, 0);//pico
+                } else {
+                    ctx.lineTo(size, 0);//arista
+                }
+            }
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+        }
+
+        function createStarryNight(ctx,clipRadius,numberOfStars){
+            for(let i = 0; i<numberOfStars;i++){
+                ctx.save();
+                ctx.fillStyle = '#fff';
+                ctx.translate(clipRadius - Math.floor(Math.random() * clipRadius*2),
+                clipRadius - Math.floor(Math.random() * clipRadius*2));
+                drawStar(ctx, Math.floor(Math.random() * 4) + 2);
+                ctx.restore();
+            }
+        }
+
+
+        initializeCompositeGUI();
+        doClipping();
+    </script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>inicio</title>
+</head>
+<body>
+    <p>El elemento canvas tiene un width de 300px y height de 150px por defecto</p>
+    <canvas id="tutorial" width="300px" height="150px">
+        <p>Su navegador no soporta canvas</p>
+    </canvas>
+
+    <p>Dentro de las etiquetas del canvas se puede añadir un fallback en caso de que el navegador no tenga soporte</p>
+</body>
+
+<style>
+    #tutorial {
+        border: 1px solid black;
+    }
+</style>
+<script>
+    function loadCanvas(){
+        let tutorial = document.getElementById('tutorial');
+        if(tutorial){
+            let ctx = tutorial.getContext('2d'); //lectura de contexto
+
+            ctx.fillStyle = 'rgb(200, 0, 0)';
+            ctx.fillRect(10,10,50,50);
+
+            ctx.fillStyle = 'rgba(0, 0, 200, 0.5)';
+            ctx.fillRect(35,35,50,50);
+        }
+    }
+
+    loadCanvas();
+</script>
+</html>

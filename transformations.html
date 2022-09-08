@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transformaciones</title>
+    <link rel="stylesheet" href="./bulma.min.css">
+    <style>
+        #canvasTransformTest2
+        {
+            border: solid 1px black;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <h3>transformaciones</h3>
+            <p>
+                permite que se cambie la posicion o se realicen rotaciones en el grid.
+                <br>
+                antes de revisar los metodos correspondientes, tenemos 2 metodos fundamentales
+            </p>
+            <pre>
+                <code>
+                    save()
+                    restore()
+                </code>
+            </pre>
+            <p>
+                <code>save()</code> permite guardar el estado de un contexto y <code>restore()</code>
+                regresar al ultimo punto guardado
+            </p>
+
+            <canvas id="canvasEstados" width="200" height="150"></canvas>
+            <h3>Translations</h3>
+            <p>
+                permite mover el canvas de su posicion original
+            </p>
+            <pre>
+                <code>
+                    translate(x,y);
+                </code>
+            </pre>
+            <canvas id="canvasTranslations" width="300" height="200"></canvas>
+            <h3>rotate</h3>
+            <p>
+                el metodo rotate permite cambiar el angulo del canvas, recibe el angulo
+                en radianes y este siempre es clock-wise
+            </p>
+            <pre>
+                <code>
+                    rotate(angle);
+                </code>
+            </pre>
+            <canvas id="canvasRotate" width="300" height="200"></canvas>
+            <h3>escalado</h3>
+            <p>
+                la funcion permite  incrementar o decrementar la escala de los pixeles
+                en el grid del canvas, de tal manera que el valor 1.0 es el por defecto.
+            </p>
+            <p>
+                si se asignan valores menores a 1.0 se reduce el tamaño y mayores aumentan
+                la cantidad de pixeles por unidad.
+
+                de igual manera los valores negativos permiten un efecto de espejo
+            </p>
+            <pre>
+                <code>scale(x,y)</code>
+            </pre>
+            <canvas id="canvasScale" width="700" height="200"></canvas>
+            <h3>transform</h3>
+            <p>
+                la funcion <code>tansform()</code> multiplica la matriz identidad por la matriz dada,
+                lo que permite modificar en un mismo metodo el angulo, el movimiento y la escala.
+
+                <br>
+
+                hay que tener en cuenta que los nuevos valores tienen impacto entre ellos mismos,cada que se
+                invoca el metodo <code>transform()</code> internamente se hace un producto de matrices:
+                <table>
+                    <tbody>
+                        <tr>
+                            <td>a</td><td>c</td><td>e</td>
+                        </tr>
+                        <tr>
+                            <td>b</td><td>d</td><td>f</td>
+                        </tr>
+                        <tr>
+                            <td>0</td><td>0</td><td>1</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <br>
+                teniendo asi las siguientes operaciones:
+
+                <pre>
+                    <code>
+                        //escalas
+                        
+                        estan dadas por un el producto de la propia escala y se les suma el producto
+                        de los valores de los movimientos angulares
+
+                        a= (a*a) + (c*b)
+                        d= (d*d) + (c*b)
+
+                        //movimientos angulares
+                        es la suma de cada angulo por los valores de las escalas horizontal y vertical
+
+                        b= (b*a) + (b*d)
+                        c= (c*a) + (c*d)
+
+                        //traslados
+
+                        multiplica el movimiento horizontal por la escala horizontal
+                        le suma el producto del movimiento angular vertical y el movimiento vertical
+                        y le suma el valor del movimiento horizontal
+                        e = (e'*a) + (c*f') + e'
+
+                        lo mismo que en e pero con los movimientos verticales
+                        f = (f'*d) + (b*e') + f'
+                    </code>
+                </pre>
+            </p>
+
+            <canvas id="canvasTransform" width="500" height="200"></canvas>
+            <h3>test de transform simple</h3>
+            <canvas id="canvasTransformTest" width="500" height="200"></canvas>
+
+            <h3>Pruebas de transform</h3>
+            <canvas id="canvasTransformTest2" width="500" height="300"></canvas>
+
+        </div>
+    </div>
+</body>
+<script>
+    function draw(){
+        let canvasEstados = document.getElementById('canvasEstados');
+        let canvasTranslations = document.getElementById('canvasTranslations');
+        let canvasRotate = document.getElementById('canvasRotate');
+        let canvasScale = document.getElementById('canvasScale');
+        let canvasTransform = document.getElementById('canvasTransform');
+        let canvasTransformTest = document.getElementById('canvasTransformTest');
+        let canvasTransformTest2 = document.getElementById('canvasTransformTest2');
+        if(canvasEstados){
+            let ctx = canvasEstados.getContext('2d');
+            ctx.fillRect(0,0,100,100);
+            ctx.save(); //guarda estilo negro
+            
+            ctx.fillStyle = 'white';
+            ctx.fillRect(10,10,80,80);
+            ctx.save(); //guarda estilo blanco
+
+            ctx.fillStyle = 'blue';
+            ctx.globalAlpha = 0.5
+            ctx.fillRect(20,20,60,60);
+
+            ctx.restore(); // regresa al ultimo estado guardado en la pila (blanco)
+            ctx.fillRect(30,30,40,40);
+
+            ctx.restore(); // regresa al ultimo estado guardado en la pila (negro)
+            ctx.fillRect(40,40,20,20);
+        }
+
+        if(canvasTranslations){
+            let ctx = canvasTranslations.getContext('2d');
+            for (var i = 0; i < 3; i++) {
+                for (var j = 0; j < 3; j++) {
+                    ctx.save();
+                    ctx.fillStyle = 'rgb(' + (51 * i) + ', ' + (255 - 51 * i) + ', 255)';
+                    ctx.translate(10 + j * 50, 10 + i * 50);
+                    ctx.fillRect(0, 0, 25, 25);
+                    ctx.restore();
+                }
+            }
+        }
+
+        if(canvasRotate){
+            let ctx = canvasRotate.getContext('2d');
+            ctx.save();
+            // blue rect
+            ctx.fillStyle = '#0095DD';
+            ctx.fillRect(30, 30, 100, 100);
+            ctx.rotate((Math.PI / 180) * 25);
+            // grey rect
+            ctx.fillStyle = '#4D4E53';
+            ctx.fillRect(30, 30, 100, 100);
+            ctx.restore();
+
+            // right rectangles, rotate from rectangle center
+            // draw blue rect
+            ctx.fillStyle = '#0095DD';
+            ctx.fillRect(150, 30, 100, 100);
+
+            ctx.translate(200, 80); // nos posicionamos en el centro del rectangulo
+            /*
+                rotamos desde el centro para que el punto de referencia del angulo
+                sea el centro del rectangulo azul y no el unicio del canvas
+            */
+            ctx.rotate((Math.PI / 180) * 25);
+            ctx.translate(-200, -80); // regresamos a la posicion inicial del canvas
+
+            // draw grey rect
+            ctx.fillStyle = '#4D4E53';
+            ctx.fillRect(150, 30, 100, 100);
+        }
+
+        if(canvasScale){
+            let ctx = canvasScale.getContext('2d');
+            ctx.save();
+            //ctx.scale(2.0,2.0);
+            ctx.fillRect(20,20,115,10);
+            ctx.font = '20px serif';
+            ctx.fillText('holaMundo',20,50);
+            ctx.restore();
+
+            //texto escalado
+            ctx.translate(150.0,0.0);
+            ctx.font = '20px serif';
+            ctx.save(); //guardamos el translate, pero no la escala
+            ctx.scale(2.0,2.0);
+            ctx.fillRect(20,20,115,10);
+            ctx.fillText('holaMundo',20,50);
+
+            ctx.restore(); // restauramos al translate y escala 1
+            ctx.translate(300.0,0.0);
+            ctx.save(); // guardamos escala de 1.0
+            ctx.scale(0.5,0.5); // si no se aplica el restore, se aplicaria el 0.5 a 2.0
+            ctx.fillRect(20,20,115,10);
+            ctx.fillText('holaMundo',20,50);
+
+            ctx.restore();
+            ctx.translate(250.0,0.0);
+            ctx.save();
+            ctx.scale(-1.0,1.0);
+            ctx.fillRect(20,20,115,10);
+            ctx.fillText('holaMundo',20,50);
+
+        }
+
+        if(canvasTransform){
+            let matrixArray = new Array();
+            let ctx = canvasTransform.getContext('2d');
+            var sin = Math.sin(Math.PI / 6);
+            var cos = Math.cos(Math.PI / 6);
+            matrixArray.push(ctx.getTransform());
+            ctx.translate(100, 100);
+            var c = 0;
+            for (var i = 0; i <= 12; i++) {
+                c = Math.floor(255 / 12 * i);
+                ctx.fillStyle = 'rgb(' + c + ', ' + c + ', ' + c + ')';
+                ctx.fillRect(0, 0, 100, 10);
+                ctx.transform(cos, sin, -sin, cos, 0, 0);
+                console.log('mod: [a:' + cos +', b:' + sin +', c:' + -sin +', d:' + cos +', e:' + 0 +', f:' + 0 +']');
+                matrixArray.push(ctx.getTransform());
+            }
+
+            ctx.setTransform(-1, 0, 0, 1, 100, 100);
+            ctx.fillStyle = 'rgba(255, 128, 255, 0.5)';
+            ctx.fillRect(0, 50, 100, 100);
+
+            for(let i=0; i< matrixArray.length;i++){
+                console.log('[a:' + matrixArray[i].a +', b:' + matrixArray[i].b +', c:' + matrixArray[i].c +', d:' + matrixArray[i].d +', e:' + matrixArray[i].e +', f:' + matrixArray[i].f +']');
+            }
+        }
+
+        if(canvasTransform){
+            let ctx = canvasTransformTest.getContext('2d');
+            let steps = 16; // divisor de 2pi (360 grados)
+            let angulo = Math.PI/(steps/2); //angulo de step
+            let senX = Math.sin(angulo);
+            let cosX = Math.cos(angulo);
+            ctx.translate(100,100);
+            console.info('==========================================');
+            for(let i=0;i <= steps; i++){
+                printMatrix(ctx.getTransform());
+                let alphaValue = 1 - (0.05 * i);
+                ctx.fillStyle = 'rgba(0,0,255,'+alphaValue+')';
+                ctx.fillRect(0,0,40,5);
+                ctx.transform(1,senX,-senX,1,0,0);
+            }
+            console.info('==========================================');
+
+            ctx.setTransform(1, 0, 0, 1, 300, 100);
+
+            console.info('==========================================');
+            for(let i=0;i <= steps; i++){
+                printMatrix(ctx.getTransform());
+                let alphaValue = 1 - (0.05 * i);
+                ctx.fillStyle = 'rgba(0,0,255,'+alphaValue+')';
+                ctx.fillRect(0,0,40,5);
+                ctx.transform(cosX,senX,-senX,cosX,0,0);
+            }
+            console.info('==========================================');
+            /*printMatrix(ctx.getTransform());
+            ctx.fillRect(0,0,40,5);
+            ctx.fillStyle = 'rgba(0,0,255,0.5)';
+            ctx.transform(1,sinX,-sinX,1,0,0);
+            printMatrix(ctx.getTransform());
+            ctx.fillRect(0,0,40,5);
+            ctx.transform(1,sinX,-sinX,1,0,0);
+            printMatrix(ctx.getTransform());
+            ctx.fillRect(0,0,40,5);
+
+            ctx.transform(1,sinX,-sinX,1,0,0);
+            printMatrix(ctx.getTransform());
+            ctx.fillRect(0,0,40,5);
+            console.info('==========================================');
+            */
+            
+            /*
+            ctx.translate(100,100);
+            ctx.transform(1,sinX,-sinX,1,0,0);
+            ctx.fillRect(0,0,100,10);
+            ctx.transform(1,sinX,-sinX,1,0,0);
+            ctx.fillRect(0,0,100,10);
+            ctx.transform(1,sinX,-sinX,1,0,0);
+            ctx.fillRect(0,0,100,10);
+            ctx.transform(1,sinX,-sinX,1,0,0);
+            ctx.fillRect(0,0,100,10);
+            ctx.transform(1,sinX,-sinX,1,0,0);
+            ctx.fillRect(0,0,100,10);
+            ctx.transform(1,sinX,-sinX,1,0,0);
+            ctx.fillRect(0,0,100,10);
+            ctx.transform(1,sinX,-sinX,1,0,0);
+            ctx.fillRect(0,0,100,10);
+            ctx.transform(1,sinX,-sinX,1,0,0);
+            ctx.fillRect(0,0,100,10);
+            */
+        }
+        if(canvasTransformTest2){
+            console.info('<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>><<');
+            let ctx = canvasTransformTest2.getContext('2d');
+            //calculamos la distancia para girar en x y y con la funcion sin
+            let senAngle = Math.sin(Math.PI/(180/30)); //30 grados
+            ctx.strokeStyle = 'red';
+            ctx.translate(200,100);
+            printMatrix(ctx.getTransform());
+            ctx.fillRect(0,0,100,5);
+            //
+            ctx.moveTo(100,0);
+            ctx.lineTo(100,(senAngle*100));
+            ctx.stroke();
+            ctx.moveTo(0,0);
+            ctx.transform(1,senAngle,-senAngle,1,0,0);
+            printMatrix(ctx.getTransform());
+            ctx.fillRect(0,0,100,5);
+            //
+            ctx.moveTo(100,0);
+            ctx.lineTo(100,(senAngle*100));
+            ctx.stroke();
+            ctx.moveTo(0,0);
+            ctx.transform(1,senAngle,-senAngle,1,0,0);
+            printMatrix(ctx.getTransform());
+            ctx.fillRect(0,0,100,5);
+            
+            //
+            ctx.moveTo(100,0);
+            ctx.lineTo(100,(senAngle*100));
+            ctx.stroke();
+            ctx.moveTo(0,0);
+            ctx.transform(1,senAngle,-senAngle,1,0,0);
+            printMatrix(ctx.getTransform());
+            ctx.fillRect(0,0,100,5);
+            
+            //
+            ctx.moveTo(100,0);
+            ctx.lineTo(100,(senAngle*100));
+            ctx.stroke();
+            ctx.moveTo(0,0);
+            ctx.transform(1,senAngle,-senAngle,1,0,0);
+            printMatrix(ctx.getTransform());
+            ctx.fillRect(0,0,100,5);
+
+            ////
+            ctx.moveTo(100,0);
+            ctx.lineTo(100,(senAngle*100));
+            ctx.stroke();
+            ctx.moveTo(0,0);
+            ctx.transform(1,senAngle,-senAngle,1,0,0);
+            printMatrix(ctx.getTransform());
+            ctx.fillRect(0,0,100,5);
+
+            console.info('<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>><<');
+            //iniciamos grafico con cos
+            ctx.resetTransform();
+            let cosAngle = Math.cos(Math.PI/(180/30)); //30 grados
+            ctx.closePath();
+            ctx.beginPath();
+            ctx.strokeStyle = 'blue';
+            ctx.translate(200,100);
+            printMatrix(ctx.getTransform());
+            ctx.fillStyle = 'rgba(47, 238, 25, 0.49)';
+            printMatrix(ctx.getTransform());
+            ctx.fillRect(0,0,100,5);
+
+            ////
+            ctx.moveTo(100,0);
+            ctx.lineTo((cosAngle*100),senAngle*100);
+            ctx.stroke();
+            ctx.moveTo(0,0);
+            ctx.transform(cosAngle,senAngle,-senAngle,cosAngle,0,0);
+            printMatrix(ctx.getTransform());
+            ctx.fillRect(0,0,100,5);
+
+            ////
+            ctx.moveTo(100,0);
+            ctx.lineTo((cosAngle*100),senAngle*100);
+            ctx.stroke();
+            ctx.moveTo(0,0);
+            ctx.transform(cosAngle,senAngle,-senAngle,cosAngle,0,0);
+            printMatrix(ctx.getTransform());
+            ctx.fillRect(0,0,100,5);
+
+            ////
+            ctx.moveTo(100,0);
+            ctx.lineTo((cosAngle*100),senAngle*100);
+            ctx.stroke();
+            ctx.moveTo(0,0);
+            ctx.transform(cosAngle,senAngle,-senAngle,cosAngle,0,0);
+            printMatrix(ctx.getTransform());
+            ctx.fillRect(0,0,100,5);
+
+            ////
+            ctx.moveTo(100,0);
+            ctx.lineTo((cosAngle*100),senAngle*100);
+            ctx.stroke();
+            ctx.moveTo(0,0);
+            ctx.transform(cosAngle,senAngle,-senAngle,cosAngle,0,0);
+            printMatrix(ctx.getTransform());
+            ctx.fillRect(0,0,100,5);
+
+            ////
+            ctx.moveTo(100,0);
+            ctx.lineTo((cosAngle*100),senAngle*100);
+            ctx.stroke();
+            ctx.moveTo(0,0);
+            ctx.transform(cosAngle,senAngle,-senAngle,cosAngle,0,0);
+            printMatrix(ctx.getTransform());
+            ctx.fillRect(0,0,100,5);
+        }
+        
+
+    }
+    draw();
+
+    function printMatrix(matrix){
+        console.log('[a:' + matrix.a +', b:' + matrix.b +', c:' + matrix.c +', d:' + matrix.d +', e:' + matrix.e +', f:' + matrix.f +']');
+    }
+</script>
+</html>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>particulas</title>
+    <style>
+        #particulas {
+            position: fixed;
+            z-index: -1;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+    </style>
+</head>
+<body>
+    <canvas id="particulas"></canvas>
+    <script>
+        //valores de canvas
+        const canvas = document.getElementById('particulas');
+        var context = canvas.getContext('2d');
+        let particles = [];
+        //cursor en el centro del canvas
+        var cursor = {
+            x: innerWidth,
+            y: innerHeight
+        }
+        class Particle {
+            constructor(x,y, trailWidth, color, rotationSpeed){
+                this.x = x;
+                this.y = y;
+                this.trailWidth = trailWidth;
+                this.color = color;
+                this.rotationSpeed = rotationSpeed;
+                this.theta = Math.random()*(Math.PI*2); //punto aleatorio entre 0 y 2PI
+                this.t = Math.random()*150; //distancia radial de la particula
+            }
+
+            rotar(){
+                // almacenamos las cordenadas de x y y
+                let ls = {
+                    x: this.x,
+                    y: this.y
+                }
+                this.theta += this.rotationSpeed;//movemos el punto en la circunferencia
+
+                //a partir del angulo actualizado (theta) obtiene el cos y este lo multiplic por t(hipotenusa)
+                //para obtener la caordenada en x, a esta le suma el despalzamiento en x del puntero
+                //lo mismo hace para obtener la cordenada en y, pero con sin y el desplazamiento del cursor en y
+                this.x = cursor.x + Math.cos(this.theta)*this.t;
+                this.y = cursor.y + Math.sin(this.theta)*this.t;
+
+                //dibujamos path
+                context.beginPath();
+                context.lineWidth = this.trailWidth;
+                context.strokeStyle = this.color;
+
+                //se posiciona en el punto original
+                context.moveTo(ls.x,ls.y);
+                //traza una linea al nuevo punto
+                context.lineTo(this.x,this.y);
+                context.stroke();
+            }
+        }
+
+        function generateParticles(amount) {
+            for (let i = 0; i < amount; i++) {
+                particles[i] = new Particle(
+                    innerWidth / 2,
+                    innerHeight / 2,
+                    4,
+                    generateColor(),
+                    0.05
+                );
+            }
+        }
+
+        function animParticles() {
+            
+            context.fillStyle = "rgba(0,0,0,0.05)";
+            context.fillRect(0, 0, canvas.width, canvas.height);
+            particles.forEach((particle) => particle.rotar());
+            requestAnimationFrame(animParticles);
+        }
+
+        function initParticles(){
+            context.globalAlpha = 0.5;
+            generateParticles(101);
+            setCanvasSize();
+            animParticles();
+        }
+
+        //utilidades
+        //adapta el tamaño del canvas
+        function setCanvasSize(){
+            canvas.width = innerWidth;
+            canvas.height = innerHeight;
+        }
+        
+        //genera un color aleatorio en hex
+        function generateColor() {
+            let hexSet = "0123456789ABCDEF";
+            let finalHexString = "#";
+            for (let i = 0; i < 6; i++) {
+                finalHexString += hexSet[Math.ceil(Math.random() * 15)];
+            }
+            return finalHexString;
+        }
+
+        //listeners
+
+        addEventListener("mousemove", (e) => {
+            cursor.x = e.clientX;
+            cursor.y = e.clientY;
+        });
+
+        addEventListener("touchmove",(e) => {
+                e.preventDefault();
+                cursor.x = e.touches[0].clientX;
+                cursor.y = e.touches[0].clientY;
+            },{ passive: false }
+        );
+
+        addEventListener("resize", () => setCanvasSize());
+
+        initParticles();
+    </script>
+</body>
+</html>

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>imagenes</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <h3 class="title">imagenes</h3>
+            <p>
+                ademas de dibujar paths tambien se pueden usar imagenes y el proceso comprende:
+                <ul>
+                    <li>obtener una referencia de la imagen desde un HTMLImageElement, un canvas o desde una ubicacion remota</li>
+                    <li>dibujar la imagen utilizando la funcion <code>drawImage()</code></li>
+                </ul>
+            </p>
+            <h3>Fuentes de las imagenes</h3>
+            <p>
+                los elementos que se pueden dibujar son los siguientes:
+                <ul>
+                    <li>HTMLImageElement - utilizando el constructor <code>Image()</code> o a partir de un elemnto <code>img</code></li>
+                    <li>SVGImageElement - imagenes embebidas utilizando <code>image</code></li>
+                    <li>HTMLVideoElement - obteniendo el frame actual de un objeto <code>video</code></li>
+                    <li>HTMLCanvasElement - utilizando otro objeto <code>canvas</code> como imagen</li>
+                </ul>
+            </p>
+
+            <h3>Obtener imagenes de la misma pagina</h3>
+            <p> esto se puede realizar mediante <code>document.images, document.getElementById() o document.getElementsByTagName()</code></p>
+            <h3>Imagenes de otros dominios</h3>
+            <p>
+                mediante el uso de la propiedad crossorigin <code>HTMLImageElement.crossOrigin</code> se puede solicitar el permiso de uso de una imagen
+                siempre y cuando host permita el acceso cross-domain del recurso.
+                <br>
+                de no ser asi, el canvas pasaria a ser un tainted canvas (canvas inseguro).
+            </p>
+            <h3>Creando una imagen mediante el constructor <code>Image()</code></h3>
+            <p>
+                Se debe de pasar la ruta de la imagen y es muy importante usar <code>drawImage()</code>
+                una vez que la imagen ha terminado de cargarse, lo cual se logra con un eventHandler
+                de <code>load</code>
+            </p>
+        
+            <canvas id="cnvImgScratch" width="500px" height="300px"></canvas>
+
+            <h3>Usando una imagen embebida</h3>
+            <p>
+                tambien se puede utilizar una imagen embebida de la siguiente manera 
+                <code>img.src = 'data:image/gif;base64,R0lGODlhCwALAIAAAAAA3pn/ZiH5...';</code>
+            </p>
+            <p>
+                con este metodo no es necesario esperar la carga de la imagen, pero hay que tener en cuenta 
+                que se pierde el uso de la cache y las cadenas pueden ser grandes.
+            </p>
+            <canvas id="cnvImgUrl" width="120px" height="100px"></canvas>
+            <h3>usando frames de un elemento <code>video</code></h3>
+            <p>
+                Se puede obtener el elemento video y pasarlo a la funcion <code>drawImage();</code>
+            </p>
+            <video  id="video" width="500px" height="281px" controls="false">
+                <source src="./lain.mp4" type="video/mp4">
+            </video>
+            <canvas id="cnvVideo" width="500px" height="281px"></canvas>
+            <h3>imagenes y paths</h3>
+            <p>
+                una vez que se ha utilizado el metodo <code>drawImage()</code> se puede seguir dibujando
+                cualquier elemento o path.
+
+                como en el siguiente ejemplo donde se dibuja el fondo de una grafica y posteriormente
+                una linea para formar una grafica.
+            </p>
+            <canvas id="cnvGraph" width="500px" height="300px"></canvas>
+            
+            <h3>escalado</h3>
+            <p>
+                para escalar una imagen se usa la siguiente sobrecaarga <code>drawImage(x,y,width,height)</code>
+                en el siguiente ejemplo se hace mas pequeña la imagen y se repite a manera de grid
+            </p>
+            <canvas id="cnvImgGrid" width="500px" height="300px"></canvas>
+            <h3>Slicing</h3>
+            <p>
+                tambien se puede cortar una imagen y posteriormente hacer un posicionamiento y escalar dicha imagen
+                esto se logra con la ultima sobrecarga <code>drawImage(image,sx,xy,swidth,sheight,dx,dy,dwidth,dheight)</code>
+                donde s es prefijo de source y d de destination.
+                <br>
+                con sx,xy,swidth,sheight vamos a controlar la porcion de imagen que queremos tomar y con dx,dy,dwidth,dheight
+                la posicion y escalado de la imagen resultante
+            </p>
+            <canvas id="cnvImgSlicing" width="500px" height="300px"></canvas>
+            <h3>suavizado al escalar iamgenes</h3>
+            <p>
+                cuando se escala una imagen, puede resultar en bordes o detalles difuminados, ya que por defecto
+                se realizar un suavizado por medio de algoritmos con esa finalidad, dado cada contexto se puede
+                desactivar ese comportamiento mediante las siguiente propiedad que por defecto es true:
+            </p>
+            <pre>
+                <code>
+                    ctx.mozImageSmoothingEnabled = false;
+                    ctx.webkitImageSmoothingEnabled = false;
+                    ctx.msImageSmoothingEnabled = false;
+                    ctx.imageSmoothingEnabled = false;
+                </code>
+            </pre>
+        </div> 
+    </div>
+</body>
+
+<script>
+    function drawInCanvas(){
+        let cnvImgScratch = document.getElementById('cnvImgScratch');
+        let cnvImgUrl = document.getElementById('cnvImgUrl');
+        let cnvVideo = document.getElementById('cnvVideo');
+        let cnvGraph = document.getElementById('cnvGraph');
+        let cnvImgGrid = document.getElementById('cnvImgGrid');
+        let cnvImgSlicing = document.getElementById('cnvImgSlicing');
+        let imgScratch = new Image();
+        imgScratch.src = './img_pattern.png';
+        if(cnvImgScratch){
+            let ctx = cnvImgScratch.getContext('2d');
+            imgScratch.addEventListener('load',()=>{
+                ctx.drawImage(imgScratch,0,0,cnvImgScratch.width,cnvImgScratch.height);
+            },false);
+        }
+        if(cnvImgUrl){
+            let ctx = cnvImgUrl.getContext('2d');
+            let imgUrl = new Image();
+            imgUrl.src = 'data:image/gif;base64,R0lGODlhCwALAIAAAAAA3pn/ZiH5BAEAAAEALAAAAAALAAsAAAIUhA+hkcuO4lmNVindo7qyrIXiGBYAOw==';
+            ctx.drawImage(imgUrl,30,30,50,50);
+        }
+        if(cnvVideo){
+            let ctx = cnvVideo.getContext('2d');
+            let video = document.getElementById('video');
+            setInterval(()=>{
+                ctx.drawImage(video,0,0,cnvVideo.width,cnvVideo.height);
+                ctx.fillStyle = 'rgba(45, 83, 252, 0.39)';
+                ctx.fillRect(0,0,cnvVideo.width,cnvVideo.height);
+            },20);
+        }else{
+            console.info('error');
+        }
+        
+        if(cnvGraph){
+            let ctx = cnvGraph.getContext('2d');
+            let backdrop = new Image();
+            backdrop.src = './backdrop.png';
+            backdrop.addEventListener('load',()=>{
+                ctx.drawImage(backdrop,30,30);
+                ctx.lineWidht = 2;
+                ctx.moveTo(59,145);
+                ctx.lineTo(70,125);
+                ctx.lineTo(90,105);
+                ctx.lineTo(140,65);
+                ctx.lineTo(165,85);
+                ctx.lineTo(180,45);
+                ctx.stroke();
+            });
+        }
+
+        if(cnvGraph){
+            let ctx = cnvImgGrid.getContext('2d');
+            let widthScaled = 50, heightScaled = 60;
+            let image = new Image();
+            image.src = './img_pattern.png';
+            image.addEventListener('load',()=>{
+                let columns = cnvImgGrid.width/widthScaled;
+                let rows = cnvImgGrid.height/heightScaled;
+                for(let i=0;i<columns;i++){
+                    for(let j=0; j<rows;j++){
+                        ctx.drawImage(image,(widthScaled*i),(heightScaled*j),widthScaled,heightScaled);
+                    }
+                }
+            });
+        }
+        if(cnvImgSlicing){
+            let ctx = cnvImgSlicing.getContext('2d');
+            let image = new Image();
+            image.src = './img_pattern.png';
+            image.addEventListener('load',()=>{
+                ctx.drawImage(image,100,150,450,380,0,0,500,300);
+            });
+        }
+    }
+    drawInCanvas();
+</script>
+</html>

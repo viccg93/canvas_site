@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estilos y colores</title>
+
+    
+    
+</head>
+<body>
+    <h3>Estilos y color</h3>
+
+    <p>
+        el color por defecto tanto para lineas como relleno es negro, pero se puede cambiar mediante las instracciones
+    </p>
+    <pre>
+        <code>
+        ctx.fillStyle = "blue";
+        ctx.strokeStyle = "blue";
+
+        //los formatos aceptados son los mismos que en CSS
+
+        ctx.fillStyle = 'orange';
+        ctx.fillStyle = '#FFA500';
+        ctx.fillStyle = 'rgb(255, 165, 0)';
+        ctx.fillStyle = 'rgba(255, 165, 0, 1)';
+    </code>
+    </pre>
+    <p>
+        ejemplo asignando diferente fillStyle previo a ejecutar <code>fillRect()</code> 
+    </p>
+    <canvas id="fillStyled"></canvas>
+
+    <p>
+        ejemplo cambiado strokeStyle previo a ejecutar  <code>arc() y stroke()</code>
+    </p>
+    <canvas id="strokeStyled"></canvas>
+
+    <h3>globalAlpha</h3>
+
+    <p>el atributo <code>globalAlpha</code> del objeto context permite cambiar la transparecia entre 0.0 y 1</p>
+
+    <canvas id="globalalpha" width="200px" height="150px"></canvas>
+
+    <h3>rgba()</h3>
+
+    <p>
+        para definir colores con transparencias se utiliza rgba() que se pasa en forma de cadena 
+        <code>a strokeStyle y a fillStyle</code>
+    </p>
+
+    <canvas id="rgba" width="200px" height="150px"></canvas>
+
+    <h3>estilos de lineas</h3>
+
+    <p>
+        las siguientes funciones permiten modificar la apariencia de las lineas:
+        <ul>
+            <li>lineWidth = value - modifica el grosor</li>
+            <li>lineCap = type - modifica los finales</li>
+            <li>lineJoin = type - modifica la apariencia de las intersecciones</li>
+            <li>miterLimit = modifica el grososr de las intersecciones</li>
+            <li>getLineDash() - agrega un patron de dash</li>
+            <li>setLineDash(segments) - modifica el patron del dash</li>
+            <li>lineDashOffset = value - permite indicar el inicio del patron dash</li>
+        </ul>
+
+        algo que se debe de tomar en cuenta en el siguiente ejemplo es que la linea de ancho 1.0 (default)
+        en un punto del eje Y toma 0.5 de un pixel y 0.5 del siguiente pixel, sombreando las mitades de pixel
+        que no se rellenaron.
+
+        para arreglar esta situacion se puede elegir una cordenada con .5 extra para que la linea cubra el pixel
+        completo o en su defecto aumentar el lineWidth.
+
+    </p>
+    <p>
+        lineCap <br><br>
+
+        puede recibir 3 valores: butt, round y square
+
+        butt deja las terminaciones de la linea cortadas en los punto exactos, round agrega un circulo con radio
+        igual a la mitad del grosor de la linea y square agrega una caja con ancho igual al grosor de la linea
+        y con alto igual a la mitad del grosor
+    </p>
+
+    <p>
+        lineJoin <br><br>
+
+        puede recibir 3 valores: round, bevel y miter
+
+        round agrega un circulo en la interseccion dando un efecto redondeado, bevel agrega un triangulo para
+        rellenar el espacio de la interseccion aplanando la interseccion y miter conecta el borde exterior de
+        las terminaciones para formar una punta.
+    </p>
+
+    <p>
+        miterLimit <br><br>
+
+        por defecto tiene un valor de 10, este define cual es la distancia maxima ente la parte interna y externa
+        de la interseccion, con angulos amplios la prolongacion que realiza miter es relativamente corta, pero
+        a medida que el angulo formado por la interseccion es mas pequeño, la prolongacion tendra que ser mayor
+
+        cuando las lineas que conforman la interseccion son casi perpendiculares, la prolongacion para unirlas
+        es casi exponencial, miterLimit permite unir estas lineas como bevel cuando se alcanza el limite
+
+        con el valor de 10.0 corta las intersecciones con angulos por debajo de los 11 grados.
+    </p>
+
+    <p>
+        dashes <br><br>
+
+        getLineDash() retorna el arreglo del patron del dash, mientras que setLineDash(segments) asigna el patron
+        que se utilizara para el dash y lineDashOffset permite definir donde incia el dash en la recta
+    </p>
+    <canvas id="lineas" width="700px" height="200px"></canvas>
+
+    <h3>gradientes</h3>
+    <h4>gradiente lineal</h4>
+    <p>
+        se pueden objetos de gradiente lineales a partir de la siguiente funcion <code>ctx.createLinearGradient(x1,y1,x2,y2)</code>
+        posteriormente se utiliza la funcion <code>gradiente.addColorStop(posicion,'color')</code> para agregar un color al gradiente,
+        se pueden agregar el numero de colores que sea necesario.
+    </p>
+    <p>
+        finalmente el objeto gradiente se asigna a la propiedades de fillStyle o strokeStyle segun sea el caso.
+    </p>
+
+    <p>las cordenadas que se le pasan a la funcion representan una linea que podemos entender como la trayectoria del
+        gradiente, ademas estan dadas en funcion del canvas y no del path
+    </p>
+
+    <canvas id="gradienteLineal" width="200px" height="150px"></canvas>
+
+    <h4>gradiente radial</h4>
+    <p>
+        se pueden objetos de gradiente radial a partir de la siguiente funcion <code>ctx.createRadialGradient(x1,y1,r1,x2,y2,r2)</code>
+        y tabien se utiliza la funcion <code>gradiente.addColorStop(posicion,'color')</code> para agregar los colores
+    </p>
+    <p>
+        con la diferencia de que los valores son de 2 circulos que marcan el inicio y fin del gradiente.
+    </p>
+
+    <canvas id="gradienteRadial" width="400px" height="150px"></canvas>
+
+    <h4>gradiente conico</h4>
+    <p>
+        se pueden objetos de gradiente conico a partir de la siguiente funcion <code>ctx.createConicGradient(startAngle,x,y)</code>
+        y tabien se utiliza la funcion <code>gradiente.addColorStop(posicion,'color')</code> para agregar los colores
+    </p>
+    <p>
+        el angulo de inicio comienza sobre el centro de manera vertical y continua con direccion clockwise.
+    </p>
+
+    <canvas id="gradienteConico" width="400px" height="150px"></canvas>
+
+    <h3>patrones</h3>
+    <p>
+        se pueden aplicar patrones que se repiten para el relleno de un path, para ello se pueden utilizar
+        imagenes, videos u otros canvas
+
+        <br>
+
+        para utilizar un patron se utiliza la funcion ctx.createPattern(elemento,tipo de repeticion)
+
+        <br>
+
+        en el parametro de tipo de repeticion se pueden asignar las siguientes cadenas:
+        <ul>
+            <li>repeat - repite la imagen en el eje x y en el eje y</li>
+            <li>repeat-x - repite el objeto solo en el eje x</li>
+            <li>repeat-y - repite el objeto solo en el eje y</li>
+            <li>no-repeat - solo agrega el objeto una vez</li>
+        </ul>
+        <br>
+        cabe destacar que la imagen debe de estar totalmente cargada antes de que se aplique el patron
+    </p>
+
+    <canvas id="patrones" width="400px" height="150px"></canvas>
+
+    <h3>sombreado</h3>
+    <p>
+        se pueden aplicar sombreados a objetos como texto y su comportamiento se modifica con las siguientes
+        propiedades
+        <br>
+        <ul>
+            <li>shadowOffsetX = float - distancia horizontal entre el sombreado y el objeto</li>
+            <li>shadowOffsetY = float - distancia vertical entre el sombreado el objeto</li>
+            <li>shadowBlur = float - tamaño del efecto blur, por defecto es 0</li>
+            <li>shadowColor = color - color del sombreado</li>
+        </ul>
+        <br>
+    </p>
+
+    <canvas id="sombreado" width="400px" height="150px"></canvas>
+
+    <h3>reglas del relleno</h3>
+    <p>
+        cuando una path se va a rellenar y este comparte espacio o intersecta con otros paths es necesario
+        indicar cual es el espacio que debe ser rellenado, existen dos posibles valores que se pueden pasar
+        al metodo <code>fill('fillRule')</code>
+        <br>
+        <ul>
+            <li>'nonzero' - regla non-zero winding</li>
+            <li>'evenodd' - regla even-odd winding</li>
+        </ul>
+        <br>
+    </p>
+
+    <canvas id="relleno" width="400px" height="150px"></canvas>
+
+    
+</body>
+
+<script>
+    function draw(){
+        let fillstyled = document.getElementById('fillStyled');
+        let globalAlpha = document.getElementById('globalalpha');
+        let rgba = document.getElementById('rgba');
+        let lineas = document.getElementById('lineas');
+
+
+        if(fillstyled){
+            let ctx = fillstyled.getContext('2d');
+            ctx.beginPath();
+            for (var i = 0; i < 6; i++) {
+                for (var j = 0; j < 6; j++) {
+                ctx.fillStyle = 'rgb(' + Math.floor(255 - 42.5 * i) + ', ' +
+                                Math.floor(255 - 42.5 * j) + ', 0)';
+                ctx.fillRect(j * 25, i * 25, 25, 25);
+                }
+            }
+        }
+
+        let strokeStyled = document.getElementById('strokeStyled');
+        if(strokeStyled){
+            let ctx = strokeStyled.getContext('2d');
+            ctx.beginPath();
+            for (var i = 0; i < 6; i++) {
+                for (var j = 0; j < 6; j++) {
+                    ctx.strokeStyle = 'rgb(0, ' + Math.floor(255 - 42.5 * i) + ', ' +
+                                    Math.floor(255 - 42.5 * j) + ')';
+                    ctx.beginPath();
+                    ctx.arc(12.5 + j * 25, 12.5 + i * 25, 10, 0, Math.PI * 2, true);
+                    ctx.stroke();
+                }
+            }
+        }
+
+        if(globalAlpha){
+            let ctx = globalAlpha.getContext('2d');
+
+            ctx.beginPath();
+            ctx.fillStyle = 'green';
+            ctx.fillRect(10,10,40,40);
+            ctx.fillStyle = 'blue';
+            ctx.fillRect(50,10,40,40);
+            ctx.fillStyle = 'yellow';
+            ctx.fillRect(10,50,40,40);
+            ctx.fillStyle = 'red';
+            ctx.fillRect(50,50,40,40);
+
+            ctx.moveTo(50,50);
+            ctx.fillStyle = 'white';
+            ctx.globalAlpha = 0.2
+
+            //se van a dibujar arcos incrementales hasta con radio <= 40
+
+            for(let i=2; i<= 40;i+=5){
+                ctx.arc(50,50,i,0,Math.PI*2,false);
+                ctx.fill();
+            }
+        }
+
+        if(rgba){
+            let ctx = rgba.getContext('2d');
+
+            let colors = ['rgb(22, 233, 101)','rgb(35, 95, 227)','rgb(228, 141, 39)','rgb(246, 3, 3)'];
+
+            ctx.beginPath();
+
+            colors.forEach((color,index)=>{
+                ctx.fillStyle = color;
+                ctx.fillRect(10, 10+(index*30),150,30);
+
+                let nslices = 10, opacity = 0, widthRectangle = (150-10)/nslices;
+
+                for(let i = 0;i < nslices;i++){
+                    opacity = i/nslices;
+                    ctx.fillStyle = 'rgba(255, 255, 255,' + opacity + ')';
+                    ctx.fillRect( 15 + (widthRectangle*i),15+(index*30),widthRectangle,20);
+                }
+            });
+        }
+
+        if(lineas){
+            let ctx = lineas.getContext('2d');
+
+            //punto de inicio (10,10)
+            
+            for(let i=0; i < 10; i++){
+                ctx.beginPath();
+                let posX = 10+(15.5*i);
+                ctx.moveTo(posX,10);
+                if(i<2){
+                    //la primera linea esta a inicio de pixel por lo que sombrea
+                    //la segunda esta a mitad de pixel, por lo que no sombrea
+                    ctx.lineWidth = 1;
+                } else {
+                    ctx.lineWidth = (i+1);
+                }
+                
+                ctx.lineTo(posX,110);
+                ctx.stroke();
+            }
+
+            // (200, 10)
+
+            ctx.beginPath();
+            ctx.moveTo(200,10);
+            ctx.lineWidth = 10;
+            ctx.lineCap = 'butt';
+            ctx.lineTo(200,110);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.lineCap = 'round';
+            ctx.moveTo(220,10);
+            ctx.lineTo(220,110);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.lineCap = 'square';
+            ctx.moveTo(240,10);
+            ctx.lineTo(240,110);
+            ctx.stroke();
+
+            var lineJoin = ['round', 'bevel', 'miter'];
+            ctx.lineWidth = 10;
+            for (var i = 0; i < lineJoin.length; i++) {
+                ctx.lineJoin = lineJoin[i];
+                ctx.beginPath();
+                ctx.moveTo(300, 10 + i * 40);
+                ctx.lineTo(340, 50 + i * 40);
+                ctx.lineTo(380, 10 + i * 40);
+                ctx.lineTo(420, 50 + i * 40);
+                ctx.lineTo(460, 10 + i * 40);
+                ctx.stroke();
+            }
+
+            ctx.beginPath();
+            ctx.miterLimit = 5.0;
+            ctx.moveTo(500,90);
+            ctx.lineTo(530,40);
+            ctx.lineTo(560,90);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(580,90);
+            ctx.lineTo(590,40);
+            ctx.lineTo(600,90);
+            ctx.stroke();
+        }
+
+    }
+    draw();
+</script>
+
+<script>
+    var ctx = document.getElementById('lineas').getContext('2d');
+    var offset = 0;
+    ctx.lineWidth = 1.0;
+
+    function dibujar() {
+        ctx.clearRect(630, 40, 50, 50);
+        ctx.setLineDash([4, 2]);
+        ctx.lineDashOffset = -offset;
+        ctx.strokeRect(630, 40, 50, 50);
+    }
+
+    function march() {
+        offset++;
+        if (offset > 16) {
+            offset = 0;
+        }
+        dibujar();
+        setTimeout(march, 20);
+    }
+
+    march();
+
+</script>
+
+<script>
+    function dibujarGradientes(){
+        let gradienteLineal = document.getElementById('gradienteLineal');
+        let gradienteRadial = document.getElementById('gradienteRadial');
+        let gradienteConico = document.getElementById('gradienteConico');
+        if(gradienteLineal){
+            let ctx = gradienteLineal.getContext('2d');
+            
+            let gradiente1 = ctx.createLinearGradient(0,0,0,150);
+            gradiente1.addColorStop(0, '#00ABEB');
+            gradiente1.addColorStop(0.5, '#fff');
+            gradiente1.addColorStop(0.5, '#26C000');
+            gradiente1.addColorStop(1, '#fff');
+
+            let gradiente2 = ctx.createLinearGradient(0,50,0,95);
+            gradiente2.addColorStop(0.5, '#000');
+            gradiente2.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+
+            ctx.fillStyle = gradiente1;
+            ctx.strokeStyle = gradiente2;
+
+            ctx.fillRect(10, 10, 130, 130);
+            ctx.strokeRect(50, 50, 50, 50);
+        }
+
+        if(gradienteRadial){
+            let ctx = gradienteRadial.getContext('2d');
+
+            ctx.beginPath();
+            let innerCircle = new Path2D();
+            innerCircle.arc(100,100,25,0,Math.PI*2,false);
+            let upperCircle = new Path2D();
+            upperCircle.arc(100,100,50,0,Math.PI*2,false);
+
+            ctx.stroke(innerCircle);
+            ctx.stroke(upperCircle);
+
+            ctx.beginPath();
+            let gradiente1 = ctx.createRadialGradient(100,100,25,100,100,50);
+            gradiente1.addColorStop(0,'rgba(0, 255, 90, 0.29)');
+            gradiente1.addColorStop(0.5,'rgba(0, 181, 255, 0.17)');
+            ctx.fillStyle = gradiente1;
+
+            ctx.fill(upperCircle);
+
+            var radgrad = ctx.createRadialGradient(245, 45, 10, 252, 50, 30);
+            radgrad.addColorStop(0, '#A7D30C');
+            radgrad.addColorStop(0.9, '#019F62');
+            radgrad.addColorStop(1, 'rgba(1, 159, 98, 0)');
+
+            var radgrad2 = ctx.createRadialGradient(305, 105, 20, 312, 120, 50);
+            radgrad2.addColorStop(0, '#FF5F98');
+            radgrad2.addColorStop(0.75, '#FF0188');
+            radgrad2.addColorStop(1, 'rgba(255, 1, 136, 0)');
+
+            var radgrad3 = ctx.createRadialGradient(295, 15, 15, 302, 20, 40);
+            radgrad3.addColorStop(0, '#00C9FF');
+            radgrad3.addColorStop(0.8, '#00B5E2');
+            radgrad3.addColorStop(1, 'rgba(0, 201, 255, 0)');
+
+            var radgrad4 = ctx.createRadialGradient(200, 150, 50, 200, 140, 90);
+            radgrad4.addColorStop(0, '#F4F201');
+            radgrad4.addColorStop(0.8, '#E4C700');
+            radgrad4.addColorStop(1, 'rgba(228, 199, 0, 0)');
+
+
+            ctx.fillStyle = radgrad4;
+            ctx.fillRect(200, 0, 150, 150);
+            ctx.fillStyle = radgrad3;
+            ctx.fillRect(200, 0, 150, 150);
+            ctx.fillStyle = radgrad2;
+            ctx.fillRect(200, 0, 150, 150);
+            ctx.fillStyle = radgrad;
+            ctx.fillRect(200, 0, 150, 150);
+        }
+
+        if(gradienteConico){
+            let ctx = gradienteConico.getContext('2d');
+            let gradiente1 = ctx.createConicGradient(0,100,100);
+            gradiente1.addColorStop(0,'white');
+            gradiente1.addColorStop(0.25,'white');
+            gradiente1.addColorStop(0.25,'black');
+            gradiente1.addColorStop(0.5,'black');
+            gradiente1.addColorStop(0.5,'white');
+            gradiente1.addColorStop(0.75,'white');
+            gradiente1.addColorStop(0.75,'black');
+            gradiente1.addColorStop(1,'black');
+
+            ctx.fillStyle = gradiente1;
+
+            ctx.fillRect(80,80,40,40);
+
+            ctx.fillStyle = 'blue'; // si se asigna un nuevo estilo, el gradiente ay no tiene efecto
+
+            ctx.fillRect(150,70,40,40);
+        }
+    }
+
+    dibujarGradientes();
+</script>
+
+<script>
+    function dibujarPatrones(){
+        let patrones = document.getElementById('patrones');
+        if(patrones){
+            let ctx = patrones.getContext('2d');
+            let img = new Image();
+            img.src = './canvas_createpattern.png';
+            img.onload = ()=>{
+                let patron = ctx.createPattern(img,'repeat');
+                ctx.fillStyle = patron;
+                ctx.fillRect(10,10,200,200);
+            };
+        }
+    }
+    dibujarPatrones();
+</script>
+
+<script>
+    function dibujarSombreado(){
+        let sombreado = document.getElementById('sombreado');
+        if(sombreado){
+            let ctx = sombreado.getContext('2d');
+            ctx.shadowOffsetX = -1.0;
+            ctx.shadowOffsetY = 2.0;
+            ctx.shadowBlur = 1.0;
+            ctx.shadowColor = 'blue';
+
+            ctx.font = '32px Times New Roman'; //modifica el tamanio y fuente del texto
+            ctx.fillText('Hola mundo Canvas',50,50);
+        }
+    }
+    dibujarSombreado();
+</script>
+
+<script>
+    function dibujarRelleno(){
+        let relleno = document.getElementById('relleno');
+        if(relleno){
+            let ctx = relleno.getContext('2d');
+            ctx.arc(70,70,20,0,Math.PI*2,false);
+            ctx.arc(70,70,50,0,Math.PI*2,false);
+            ctx.fill('nonzero');
+
+            ctx.arc(200,70,20,0,Math.PI*2,false);
+            ctx.arc(200,70,50,0,Math.PI*2,false);
+            ctx.fill('evenodd');
+        }
+    }
+    dibujarRelleno();
+</script>
+</html>

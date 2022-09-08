@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comparativa tiempos</title>
+    <link rel="stylesheet" href="./bulma.min.css">
+    <style>
+        #canvas
+        {
+            border: solid 1px black;
+        }
+        .chartCanvas {
+            position: absolute;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <h3>Comparativa tiempos</h3>
+            <p>
+                vamos a comparar los tiempos que toma imprimir un shape con transform vs rotate
+            </p>
+            <h2>transform</h2>
+
+            <canvas id="canvasTransform" width="1000" height="1200"></canvas>
+            <canvas id="graficaTransform" class="chartCanvas" width="500" height="300"></canvas>
+
+            <h2>rotate</h2>
+
+            <canvas id="canvasRotate" width="1000" height="1200"></canvas>
+            <canvas id="graficaRotate" class="chartCanvas" width="500" height="300"></canvas>
+        </div>
+    </div>
+</body>
+<script>
+    function draw(){
+        let canvasTransform = document.getElementById('canvasTransform');
+        let canvasRotate = document.getElementById('canvasRotate');
+        let timeTransform = new Array();
+        let timeRotate = new Array();
+        if(canvasTransform){
+            let ctx = canvasTransform.getContext('2d');
+            for(let i=1;i<=20000;i+=1000){
+                timeTransform.push(measureTest(()=>generateGraphicCase(ctx,i),i));
+            }
+        }
+
+        if(canvasRotate){
+            let ctx = canvasRotate.getContext('2d');
+            for(let i=1;i<=20000;i+=1000){
+                timeRotate.push(measureTest(()=>generateGraphicCaseRotate(ctx,i),i));
+            }
+        }
+
+        let graficaTransform = document.getElementById('graficaTransform');
+        let graficaRotate = document.getElementById('graficaRotate');
+        printTimeChart(graficaTransform,timeTransform);
+        printTimeChart(graficaRotate,timeRotate);
+    }
+
+    function generateGraphicCase(ctx,numLoaders){
+        let row = 1;
+        let xOffset = 0;
+        let xPos = 0;
+        for(let i=1; i <= numLoaders; i++){
+            xPos = (45*i)-xOffset;
+            if(xPos + 45 > canvasTransform.width){
+                row++;
+                xOffset = (45*i)-45;
+                xPos = (45*i)-xOffset;
+            }
+            generateLoader(ctx,12, xPos, 50*row, 45, 5);
+        }
+    }
+
+    function generateGraphicCaseRotate(ctx,numLoaders){
+        let row = 1;
+        let xOffset = 0;
+        let xPos = 0;
+        for(let i=1; i <= numLoaders; i++){
+            xPos = (45*i)-xOffset;
+            if(xPos + 45 > canvasTransform.width){
+                row++;
+                xOffset = (45*i)-45;
+                xPos = (45*i)-xOffset;
+            }
+            generateLoaderRotate(ctx,12, xPos, 50*row, 45, 5);
+        }
+    }
+
+    function printTimeChart(canvas,timeArr){
+        if(canvas){
+            let ctx = canvas.getContext('2d');
+            let xAxisSize = canvas.width - 60;
+            let yAxisSize = canvas.height - 60;
+            let step = xAxisSize / (timeArr.length + 1);
+            let ySliceSize = yAxisSize/5;
+            let MaxValueY = 1200;
+            let yTagStep = MaxValueY/5;
+            let scale = (yAxisSize/MaxValueY);
+            //print axis
+            ctx.beginPath();
+            ctx.moveTo(40,40);
+            ctx.lineTo(40,canvas.height-20);
+            ctx.lineTo(canvas.width-20,canvas.height-20);
+            ctx.stroke();
+
+            //print y axis
+            ctx.textAlign = 'start';
+            ctx.beginPath();
+            for(let i=1;i<=5;i++){
+                ctx.fillText(yTagStep*i,0,canvas.height - (ySliceSize * i)-20);
+            }
+            ctx.closePath();
+
+            //print x axis and points
+            for(let i=0; i<timeArr.length; i++){
+                ctx.save();
+                ctx.rotate(Math.PI/2);
+                ctx.fillText(timeArr[i].tag,canvas.height - 15,(step*-(i+1))-40);
+                ctx.restore();
+                ctx.beginPath();
+                ctx.arc((step*(i+1))+40,canvas.height-20-(scale*timeArr[i].time),2,0,Math.PI*2,false);
+                ctx.fill();
+                ctx.closePath();
+            }
+        }
+    }
+
+    function measureTest(functionToTest,tag){
+        let initTime = Date.now();
+        functionToTest();
+        let endTime = Date.now();
+        return {
+            tag: tag,
+            time: endTime - initTime
+        };
+    } 
+
+    function generateLoader(ctx,steps, xPos, yPos, width, height){
+        let angulo = Math.PI/(steps/2);
+        let senX = Math.sin(angulo);
+        let cosX = Math.cos(angulo);
+        ctx.translate(xPos,yPos);
+        for(let i=0;i <= steps; i++){
+            let alphaValue = 1 - (0.05 * i);
+            ctx.fillStyle = 'rgba(0,0,255,'+alphaValue+')';
+            ctx.fillRect(0,0,(width/2),height);
+            ctx.transform(cosX,senX,-senX,cosX,0,0);
+        }
+        ctx.resetTransform();
+    }
+
+    function generateLoaderRotate(ctx,steps, xPos, yPos, width, height){
+        let angulo = Math.PI/(steps/2);
+        ctx.translate(xPos,yPos);
+        let sumAngle = 0;
+        for(let i=0;i < steps; i++){
+            let alphaValue = 1 - (0.05 * i);
+            ctx.fillStyle = 'rgba(0,0,255,'+alphaValue+')';
+            ctx.rotate(angulo);
+            ctx.fillRect(0,0,(width/2),height);
+        }
+        ctx.translate(-xPos,-yPos);
+    }
+
+    draw();
+</script>
+</html>

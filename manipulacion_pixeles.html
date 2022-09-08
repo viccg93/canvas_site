@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>manipulacion de pixeles</title>
+    <link rel="stylesheet" href="bulma.min.css">
+    <style>
+        table {
+            max-width: 50%;
+            align-self: center;
+        }
+        td {
+            height: 200px;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <h3>manipulacion de pixeles</h3>
+            <p>
+                para acceder a los pixeles de una imagen oregion del canvas, tenemos el objeto <code>ImageData</code>
+            </p>
+            <h4>objeto ImageData</h4>
+            <p>
+                el objeto <code>ImageData</code>  tiene los siguientes miembros;
+                <pre>
+                    <code>
+                        width - ancho de la imagen
+                        height - alto de la imagen
+                        data - arreglo que almacena valores enteros de 8 bits (0 - 255) que contiene los valores rgba de cada pixel
+                    </code>
+                </pre>
+                el campo data contiene un arreglo de eneteros de 8 bits, que almacena los valores de rgba de cada pixel,
+                es decir que las primeras 4 posiciones corresponden a los valores de red, green, blue y alpha del primer
+                pixel iniciando desde la esquina superior izquierda.
+                <br>
+                de esta manera los valores de rgba del primer pixel estan en data[0], data[1], data[2], data[3]. para recorrer
+                todos los pixeles seria de 4 en 4 posiciones.
+                <br>
+                El numero de elementos en el arreglo es <code>width * height * 4</code>
+            </p>
+            <h4>metodo para obtener los indices de rgba de un pixel dadas sus cordenadas</h4>
+            <pre>
+                <code>
+                    //considerando que las cordenadas inician en 0
+                    function getRGBA(x,y,width){
+                        let startIndex = (width*4)*y + x*4;
+                        return [startIndex,startIndex+1, startIndex+2, startIndex+3];
+                    }
+                </code>
+            </pre>
+            <h4>Creacion de objeto ImageData</h4>
+            <p>
+                existen 2 sobrecargas del metodo <code>createImageData()</code>
+                <pre>
+                    <code>
+                        ctx.createImageData(width,height) // los pixeles son negro transparente rgba(0,0,0,0)
+                        ctx.createImageData(anotherImageDataObj) // crea un objeto con las dimesiones de otro objeto ImageData
+                        //no copia los pixeles, solo las dimensiones, los pixeles tambien son negro transparente
+                    </code>
+                </pre>
+            </p>
+            <h4>color picker</h4>
+            <center><canvas id="picker" width="800" height="400"></canvas></center>
+            <center>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>color hovered</th>
+                            <th>color seleccionado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td id="hoveredTarget">color</td>
+                            <td id="selectedTarget">color</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </center>
+            <h3> pintar una imagen desde un objeto ImageData</h3>
+            <p>
+                se realiza mediante el metodo contextual <code>putImageData</code>, el cual recibe
+                un objeto ImageData y las cordenadas donde se va a pintar.
+            </p>
+            <pre>
+                <code>ctx.putImageData(imageDataObj,x,y)</code>
+            </pre>
+            <center>
+                <canvas id="filters" width="700" height="400"></canvas>
+                <br>
+                
+                <form action="">
+                    <label for="original">original</label>
+                    <input type="radio" name="filterRadio" id="original" value="original" checked>
+                    <label for="grises">escala de grises</label>
+                    <input type="radio" name="filterRadio" id="grises" value="greyscale">
+                    <label for="invertido">invertido</label>
+                    <input type="radio" name="filterRadio" id="invertido" value="inverted">
+                </form>
+            </center>
+            <h4>zoom y anti-aliasing</h4>
+            <p>
+                con ayuda de varios canvas, podemos hacer zoom a una imagen de la cual tomamos
+                5 pixeles en cada direccion y esa region de 10x10 la mostramos en otro canvas.
+            </p>
+            <center>
+                <canvas id="canvasToZoom" width="1200" height="700"></canvas>
+                <canvas id="smoothedCanvas" width="200" height="200"></canvas>
+                <canvas id="pixelatedCanvas" width="200" height="200"></canvas>
+            </center>
+            <h4>guardar imagenes</h4>
+            <p>
+                canvas permite alamacenar el contenido que se ha dibujado, por defecto es en png y con una resolucion
+                de 96 dpi, estos valores pueden ser modifidos.
+
+                el metodo para generar el uri de la imagen y posteriormente alimentar un elemento img o un link
+                es <code>canvas.toDataURL()</code>, las opciones se muestran acontinuacion:
+                <pre>
+                    <code>
+                        canvas.toDataURL('image/png'); //default
+                        canvas.toDataURL('image/jpeg', quality); //quality es un valor entre 0 y 1 correspondiente a la calidad - 1 es la mejor y 0 la mas baja (mucho menor tamaño)
+                    </code>
+                </pre>
+                <br>
+                como alternativa tenemos el metodo <code>canvasToBlob(callback,type,encoderOptions)</code> el cual permite
+                crear un blob para descarga.
+            </p>
+            <center>
+                <canvas id="canvasDescarga" width="1200" height="700"></canvas>
+                <br>
+
+                <button id="btnDescarga">Descargar canvas</button>
+                <br>
+                <br>
+            </center>
+
+           
+
+            <script>
+                let image = new Image();
+                image.crossOrigin = 'anonymous';
+                image.src = './java_wall.png';
+                let canvasDescarga = document.getElementById('canvasDescarga');
+                let ctxDescarga = canvasDescarga.getContext('2d');
+                let btnDescarga = document.getElementById('btnDescarga');
+
+                image.addEventListener('load',(ev)=>{
+                    ctxDescarga.drawImage(image,0,0,canvasDescarga.width,canvasDescarga.height);
+                });
+
+                btnDescarga.addEventListener('click',(ev)=>{
+                    ev.preventDefault();
+                    let link = canvasDescarga.toDataURL('image/png',0);
+                    let a = document.createElement('a');
+                    a.setAttribute('href',link);
+                    a.setAttribute('download','imagen-canvas.png')
+                    a.click();
+                });
+
+
+            </script>
+
+            <script>
+                let imageToZoom = new Image();
+                imageToZoom.crossOrigin = 'anonymous';
+                imageToZoom.src = './java_wall.png';
+                let canvasToZoom = document.getElementById('canvasToZoom');
+                let ctx = canvasToZoom.getContext('2d');
+                let smoothedCanvas = document.getElementById('smoothedCanvas');
+                let smoothedCtx = smoothedCanvas.getContext('2d');
+                let pixelatedCanvas = document.getElementById('pixelatedCanvas');
+                let pixelatedCtx = pixelatedCanvas.getContext('2d');
+
+                imageToZoom.addEventListener('load',()=>{
+                    drawImageInCanvas(this);
+                });
+
+                canvasToZoom.addEventListener('mousemove',(ev)=>{
+                    let x = ev.clientX - canvasToZoom.getBoundingClientRect().left;
+                    let y = ev.clientY - canvasToZoom.getBoundingClientRect().top;
+                    zoom(smoothedCtx,x,y,'con imageSmoothing');
+                    zoom(pixelatedCtx,x,y,'sin imageSmoothing');
+                })
+
+                function drawImageInCanvas(img){
+                    ctx.drawImage(imageToZoom,0,0);
+                    setSmoothing(smoothedCtx,true);
+                    setSmoothing(pixelatedCtx,false);
+                }
+
+                function zoom(ctx,x,y,text){
+                    let dx = Math.min(Math.max(0,x-5),imageToZoom.width-10);//el area en x no puede ser menor a 0 ni mayor al tamaño de la img -10
+                    let dy = Math.min(Math.max(0,y-5),img.height-10);//el area en y no puede ser menor a 0 o mayor al tamaño de la img -10
+                    ctx.drawImage(canvasToZoom,dx,dy,10,10,0,0,200,200);
+                    ctx.fillStyle = 'white';
+                    ctx.fillText(text,10,20);
+                }
+
+                function setSmoothing(ctx,shouldBeSmoothed){
+                    ctx.imageSmoothingEnabled = shouldBeSmoothed;
+                    ctx.mozImageSmoothingEnabled = shouldBeSmoothed;
+                    ctx.webkitImageSmoothingEnabled = shouldBeSmoothed;
+                    ctx.msImageSmoothingEnabled = shouldBeSmoothed;
+                }
+
+
+            </script>
+
+            <script>
+                let imgChanging = new Image();
+                imgChanging.crossOrigin = 'anonymous';
+                let canvasFilters = document.getElementById('filters');
+                let filtersContext = canvasFilters.getContext('2d');
+                let filterRadio = document.querySelectorAll('[name=filterRadio]');
+                imgChanging.src = './java_wall.png';
+
+                imgChanging.addEventListener('load',()=>{
+                    drawOriginalImage();
+                });
+
+                for(let filter of filterRadio){
+                    filter.addEventListener('change',(ev)=>{
+                        switch(ev.target.value){
+                            case 'inverted':
+                                invert();
+                                break;
+                            case 'greyscale':
+                                greyscale();
+                                break;
+                            default:
+                                drawOriginalImage();
+                                break;
+                        }
+                    });
+                }
+
+                function invert(){
+                    drawOriginalImage();
+                    let imageData = getImageDataCanvas();
+                    for(let i = 0; i<imageData.data.length;i+=4){
+                        imageData.data[i] = 255 - imageData.data[i];
+                        imageData.data[i+1] = 255 - imageData.data[i+1];
+                        imageData.data[i+2] = 255 - imageData.data[i+2];
+                    }
+                    filtersContext.putImageData(imageData,0,0);
+                }
+
+                function greyscale(){
+                    drawOriginalImage();
+                    let imageData = getImageDataCanvas();
+                    for(let i = 0; i<imageData.data.length;i+=4){
+                        let avg = Math.abs((imageData.data[i],imageData.data[i+1],imageData.data[i+2])/3);
+                        imageData.data[i] = avg;
+                        imageData.data[i+1] = avg;
+                        imageData.data[i+2] = avg;
+                    }
+                    filtersContext.putImageData(imageData,0,0);
+                }
+
+                function drawOriginalImage(){
+                    filtersContext.clearRect(0,0,canvasFilters.width,canvasFilters.height);
+                    filtersContext.drawImage(imgChanging,0,0,canvasFilters.width,canvasFilters.height);
+                }
+
+                function getImageDataCanvas(){
+                    let imageData = filtersContext.getImageData(0,0,canvasFilters.width,canvasFilters.height);
+                    return imageData;
+                }
+            </script>
+            
+
+            <script>
+                var img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.src = './java_wall.png';
+                let canvas = document.getElementById('picker');
+                let pickerCtx = canvas.getContext('2d');
+                let hoveredTarget = document.getElementById('hoveredTarget');
+                let selectedTarget = document.getElementById('selectedTarget');
+
+                img.addEventListener('load',(ev)=>{
+                    pickerCtx.drawImage(img,0,0,canvas.width,canvas.height);
+                    img.style.display = 'none';
+                },false);
+
+                canvas.addEventListener('mousemove',(e)=>{
+                    let x = e.clientX - canvas.getBoundingClientRect().left;
+                    let y = e.clientY - canvas.getBoundingClientRect().top;
+                    let components = getPixelComponents(x,y);
+                    assignColor(hoveredTarget,components);
+                });
+
+                canvas.addEventListener('click',(e)=>{
+                    let x = e.clientX - canvas.getBoundingClientRect().left;
+                    let y = e.clientY - canvas.getBoundingClientRect().top;
+                    let components = getPixelComponents(x,y);
+                    assignColor(selectedTarget,components);
+                })
+
+                //utilidades
+
+                function getPixelComponents(x,y){
+                    let pixelData = pickerCtx.getImageData(x,y,1,1).data; // el array solo contendra 4 elementos (1 pixel)
+                    console.info(pixelData);
+                    return [pixelData[0],pixelData[1],pixelData[2],pixelData[3]];
+                }
+
+                function convertToRGBAString(componentArray){
+                    let resultString;
+                    if(componentArray.length == 4){
+                        resultString = 'rgba(' + componentArray[0] + ',' + componentArray[1] + ',' + componentArray[2] + ',' + componentArray[3] + ')';
+                    } else {
+                        resultString = null;
+                    }
+                    return resultString;
+                }
+
+                function invertComponents(components){
+                    return [255-components[0],255-components[1],255-components[2],components[3]];
+                }
+
+
+                function assignColor(target, RgbaColor){
+                    let backgroudColor = convertToRGBAString(RgbaColor);
+                    let textColor = convertToRGBAString(invertComponents(RgbaColor));
+                    target.style.background = backgroudColor;
+                    target.textContent = backgroudColor;
+                    target.style.color = textColor;
+                }
+            </script>
+        </div>
+    </div>
+</body>

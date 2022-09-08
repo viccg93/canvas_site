@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>dibujando texto</title>
+</head>
+<body>
+    <h3>textos</h3>
+
+    <p>
+        se pueden pintar textos en el canvas utilizando los siguientes metodos:
+        <ul>
+            <li>fillText(texto,x,y,[,MaxWidth]) - para textos rellenos</li>
+            <li>strokeText(texto,x,y,[,MaxWidth]) - para textos sin relleno</li>
+        </ul>
+    </p>
+
+    <h4>estilo</h4>
+    <p>
+        para dar estilo a un texto tenemos las siguientes propiedades:
+
+        <ul>
+            <li>font = value - acepta los mismos valores que la propiedad css font</li>
+            <li>textAlign = value - alinea el texto horizontalmente (start,end,left,right o center)</li>
+            <li>textBaseLine = value - alineacion con respecto a la linea base (top,hanging,middle,alphabetic,ideographic,bottom)</li>
+            <li>direction = value - direccion del texto (ltr,rtl,inherit)</li>
+            <li>measureText('texto') - devuelve un objeto TextMetrics que permite obtener los datos de un texto</li>
+        </ul>
+    </p>
+    <canvas id="cnvTexto" width="300px" height="150px"></canvas>
+</body>
+<script>
+    function draw(){
+        let cnvTexto = document.getElementById('cnvTexto');
+        if(cnvTexto){
+            let ctx = cnvTexto.getContext('2d');
+            ctx.font = '32px serif';
+            ctx.textAlign = 'start';
+            ctx.textBaseLine = 'top';
+            ctx.direction = 'ltr';
+
+            ctx.fillText('Hola',20,40);
+            ctx.strokeText('mundo',100,40);
+        }
+    }
+
+    draw();
+</script>
+</html>
