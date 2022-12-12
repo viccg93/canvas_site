@@ -5,7 +5,8 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Animaciones basicas</title>
-    <link rel="stylesheet" href="bulma.min.css">
+    <link rel="stylesheet" href="./public/css/styles.css">
+
 </head>
 <body>
     <div class="container">
@@ -70,9 +71,9 @@
         var moon = new Image();
         
         function init(){
-            sun.src = './canvas_sun.png';
-            earth.src = './canvas_earth.png';
-            moon.src = './canvas_moon.png';
+            sun.src = './public/img/canvas_sun.png';
+            earth.src = './public/img/canvas_earth.png';
+            moon.src = './public/img/canvas_moon.png';
             window.requestAnimationFrame(drawFrame);
         }
 
@@ -258,7 +259,7 @@
         }
 
         const img = new Image();
-        img.src = './Interpol.jpeg';
+        img.src = './public/img/java_wall.png';
         const panorama = document.getElementById('panorama');
         const CanvasXSize = panorama.width;
         const CanvasYSize = panorama.height;

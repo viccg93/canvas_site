@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>manipulacion de pixeles</title>
-    <link rel="stylesheet" href="bulma.min.css">
+    <link rel="stylesheet" href="./public/css/styles.css">
     <style>
         table {
             max-width: 50%;
@@ -144,7 +144,7 @@
             <script>
                 let image = new Image();
                 image.crossOrigin = 'anonymous';
-                image.src = './java_wall.png';
+                image.src = './public/img/java_wall.png';
                 let canvasDescarga = document.getElementById('canvasDescarga');
                 let ctxDescarga = canvasDescarga.getContext('2d');
                 let btnDescarga = document.getElementById('btnDescarga');
@@ -168,7 +168,7 @@
             <script>
                 let imageToZoom = new Image();
                 imageToZoom.crossOrigin = 'anonymous';
-                imageToZoom.src = './java_wall.png';
+                imageToZoom.src = './public/img/java_wall.png';
                 let canvasToZoom = document.getElementById('canvasToZoom');
                 let ctx = canvasToZoom.getContext('2d');
                 let smoothedCanvas = document.getElementById('smoothedCanvas');
@@ -217,7 +217,7 @@
                 let canvasFilters = document.getElementById('filters');
                 let filtersContext = canvasFilters.getContext('2d');
                 let filterRadio = document.querySelectorAll('[name=filterRadio]');
-                imgChanging.src = './java_wall.png';
+                imgChanging.src = './public/img/java_wall.png';
 
                 imgChanging.addEventListener('load',()=>{
                     drawOriginalImage();
@@ -277,7 +277,7 @@
             <script>
                 var img = new Image();
                 img.crossOrigin = 'anonymous';
-                img.src = './java_wall.png';
+                img.src = './public/img/java_wall.png';
                 let canvas = document.getElementById('picker');
                 let pickerCtx = canvas.getContext('2d');
                 let hoveredTarget = document.getElementById('hoveredTarget');

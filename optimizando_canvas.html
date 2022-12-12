@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Optimizando canvas</title>
+    <link rel="stylesheet" href="./public/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <h3>Optimizando canvas</h3>
+            <p>
+                Hay una serie de recomendaciones basicas que son de utilidad cuando se trabaja con canvas y permiten
+                mejorar la experiencia y optimizar el uso de recursos
+            </p>
+            <h4>Pre-renderizar objetos primitivos o repetitivos en un canvas offscreen</h4>
+            <p>
+                Se puede dibujar una figura en un canvas (que generalmente se encontrara fuera de la vista) y posteriormente
+                ser llamada como una imagen en el canvas principal
+            </p>
+            <pre>
+                <code>
+                    myCanvas.offscreenCanvas = document.createElement("canvas");
+                    myCanvas.offscreenCanvas.width = myCanvas.width;
+                    myCanvas.offscreenCanvas.height = myCanvas.height;
+
+                    myCanvas.getContext("2d").drawImage(myCanvas.offScreenCanvas, 0, 0);
+                </code>
+            </pre>
+
+            <center>
+                <h5>canvas con imagen (no se oculta por razones didacticas)</h5>
+                <canvas id="canvasPrimitivo" width="200px" height="180px"></canvas>
+
+                <h5>canvas principal</h5>
+                <canvas id="canvasPrincipal" width="100%" height="300px"></canvas>
+            </center>
+
+            <h4>Evitar numeros de punto flotante para cordenadas, es preferible usar enteros</h4>
+            <p>
+                el uso de cordenadas de punto flotante hace que el navegador realice calculos extra
+                para aplicar el efecto anti-aliasing, para evitar dicha sobrecarga se recomienda usar
+                <code>Math.floor()</code> para redondear todas las cordenadas.
+            </p>
+
+            <h4>No escalar imagenes con el metodo drawImage</h4>
+            <p>
+                Es preferible almacenar varios tamaños de imagen en un canvas offscreen durante la carga
+                en lugar de escalar constantemente con el metodo <code>drawImage()</code>
+            </p>
+
+            <h4>Usa multiples canvas en capas para escenas complejas</h4>
+            <p>
+                cuando hay escenas u objetos que no cambian, es mejor situarlo en elementos canvas independientes
+                en forma de escenario, lo cual se logra sobreponiendo los canvas y aplicando z-index
+            </p>
+
+            <h4>Usa CSS para imagenes de background</h4>
+            <p>
+                cuando se desea usar una imagen de fondo se recomienda usar css para evitar el renderizado de la imagen
+            </p>
+
+            <h4>Escalar el canvas mendiante CSS transforms</h4>
+            <p>
+                En caso de ser necesario escalar el elemento canvas se recomienda usar css y es preferible escalar
+                un elemento canvas pequeño para hacerlo mas grande que escalar un elemento canvas grande para hacerlo
+                mas pequeño
+
+                El caso optimo es evitar escalar el elemento canvas
+            </p>
+            <pre>
+                <code>
+                    const scaleX = window.innerWidth / canvas.width;
+                    const scaleY = window.innerHeight / canvas.height;
+
+                    const scaleToFit = Math.min(scaleX, scaleY);
+                    const scaleToCover = Math.max(scaleX, scaleY);
+
+                    stage.style.transformOrigin = "0 0"; //scale from top left
+                    stage.style.transform = `scale(${scaleToFit})`;
+                </code>
+            </pre>
+
+            <h4>Apagar la transparencia</h4>
+            <p>
+                Si la app no hace uso del backdrop transparente, se recomienda desactivar la propiedad alpha
+            </p>
+            <pre>
+                <code>
+                    const ctx = canvas.getContext("2d", { alpha: false });
+                </code>
+            </pre>
+
+            <h4>Escalado para altas resoluciones</h4>
+            <p>
+                Cuando un elemento canvas es visualizado en pantallas de alta resolucion es posible que luzca borroso,
+                una de las posibles soluciones es escalar el canvas
+            </p>
+            <pre>
+                <code>
+                    // Get the DPR and size of the canvas
+                    const dpr = window.devicePixelRatio;
+                    const rect = canvas.getBoundingClientRect();
+
+                    // Set the "actual" size of the canvas
+                    canvas.width = rect.width * dpr;
+                    canvas.height = rect.height * dpr;
+
+                    // Scale the context to ensure correct drawing operations
+                    ctx.scale(dpr, dpr);
+
+                    // Set the "drawn" size of the canvas
+                    canvas.style.width = `${rect.width}px`;
+                    canvas.style.height = `${rect.height}px`;
+                </code>
+            </pre>
+
+            <canvas id="canvasHighResolution" width="50px" height="50"></canvas>
+
+            <script>
+                function createPrimitiveImage(){
+                    let canvasWidth = 200;
+                    let canvasHeight = 180;
+                    let circleRatio = canvasWidth < canvasHeight ? canvasWidth/2: canvasHeight/2;
+
+                    let canvasPrimitivo = document.getElementById('canvasPrimitivo');
+                    let ctx = canvasPrimitivo.getContext('2d');
+                    ctx.beginPath();
+                    ctx.arc(canvasWidth/2, canvasHeight/2, circleRatio, Math.PI / 7, -Math.PI / 7, false);
+                    ctx.lineTo(canvasWidth/2, canvasHeight/2);
+                    ctx.fill();
+                    return canvasPrimitivo;
+                }
+
+                function createMainCanvas(){
+                    let canvasPrimitivo = createPrimitiveImage();
+                    let canvasPrincipal = document.getElementById('canvasPrincipal');
+                    let ctx = canvasPrincipal.getContext('2d');
+                    ctx.canvas.width  = window.innerWidth;
+                    let drawStartingPoint = 0;
+                    while((drawStartingPoint + 200) < window.innerWidth){
+                        ctx.drawImage(canvasPrimitivo,drawStartingPoint,0);
+                        drawStartingPoint+= 200;
+                    }
+
+                    //cracion de offscreenCanvas
+                    canvasPrincipal.offScreenCanvas = document.createElement('canvas');
+                    canvasPrincipal.offScreenCanvas.width = canvasPrincipal.width;
+                    canvasPrincipal.offScreenCanvas.height = canvasPrincipal.height;
+
+                    canvasPrincipal.getContext('2d').drawImage(canvasPrincipal.offScreenCanvas,0,0);
+                }
+                createMainCanvas();
+
+                function scaleCanvas(){
+                    let highResCanvas = document.getElementById('canvasHighResolution');
+                    let ctx = highResCanvas.getContext('2d');
+                    //obtener el pixel ratio
+                    let dpr = window.devicePixelRatio;
+                    console.log('dpr: ' + dpr);
+                    //obtener los atributos de espaciado del canvas
+                    let rect = highResCanvas.getBoundingClientRect();
+                    console.log(rect);
+
+                    //ajuste de width y height del sistema de cordenadas con el pixel ratio
+                    highResCanvas.width = rect.width * dpr;
+                    highResCanvas.height = rect.height * dpr;
+
+                    //Se ajusta escala del context, para las operaciones de drawing
+                    ctx. scale(dpr,dpr);
+
+                    //ajuste del box-sizing del canvas
+                    highResCanvas.style.width = `${rect.width}px`;
+                    highResCanvas.style.height = `${rect.height}px`;
+
+                    ctx.beginPath()
+                    ctx.moveTo(10,10);
+                    ctx.lineTo(highResCanvas.width - 10,10);
+                    ctx.lineTo(highResCanvas.width - 10, highResCanvas.height -10);
+                    ctx.lineTo(10, highResCanvas.height -10);
+                    ctx.closePath();
+                    ctx.stroke();
+                }
+
+                scaleCanvas();
+
+                window.addEventListener('resize', (event)=>{
+                    console.log('evento resize');
+                    let windowWidth = window.innerWidth - 20;
+                    let windowHeight = window.innerHeight - 20;
+                    
+                    let highResCanvas = document.getElementById('canvasHighResolution');
+                    let ctx = highResCanvas.getContext('2d');
+                    let dpr = window.devicePixelRatio;
+                    highResCanvas.width = windowWidth * dpr;
+                    highResCanvas.height = windowHeight * dpr;
+                    ctx. scale(dpr,dpr);
+                    highResCanvas.style.width = `${windowWidth}px`;
+                    highResCanvas.style.height = `${windowHeight}px`;
+
+                    //la hacer un resize del canvas, se limpian los paths
+
+                    ctx.beginPath()
+                    ctx.moveTo(10,10);
+                    ctx.lineTo(highResCanvas.width - 10,10);
+                    ctx.lineTo(highResCanvas.width - 10, highResCanvas.height -10);
+                    ctx.lineTo(10, highResCanvas.height -10);
+                    ctx.closePath();
+                    ctx.stroke();
+
+                },true)
+            </script>
+        </div>
+    </div>
+</body>

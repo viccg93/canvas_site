@@ -5,8 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>imagenes</title>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+    <link rel="stylesheet" href="./public/css/styles.css">
 </head>
 <body>
     <div class="container">
@@ -63,7 +62,7 @@
                 Se puede obtener el elemento video y pasarlo a la funcion <code>drawImage();</code>
             </p>
             <video  id="video" width="500px" height="281px" controls="false">
-                <source src="./lain.mp4" type="video/mp4">
+                <source src="./public/vid/lain.mp4" type="video/mp4">
             </video>
             <canvas id="cnvVideo" width="500px" height="281px"></canvas>
             <h3>imagenes y paths</h3>
@@ -119,7 +118,7 @@
         let cnvImgGrid = document.getElementById('cnvImgGrid');
         let cnvImgSlicing = document.getElementById('cnvImgSlicing');
         let imgScratch = new Image();
-        imgScratch.src = './img_pattern.png';
+        imgScratch.src = './public/img/img_pattern.png';
         if(cnvImgScratch){
             let ctx = cnvImgScratch.getContext('2d');
             imgScratch.addEventListener('load',()=>{
@@ -147,7 +146,7 @@
         if(cnvGraph){
             let ctx = cnvGraph.getContext('2d');
             let backdrop = new Image();
-            backdrop.src = './backdrop.png';
+            backdrop.src = './public/img/backdrop.png';
             backdrop.addEventListener('load',()=>{
                 ctx.drawImage(backdrop,30,30);
                 ctx.lineWidht = 2;
@@ -165,7 +164,7 @@
             let ctx = cnvImgGrid.getContext('2d');
             let widthScaled = 50, heightScaled = 60;
             let image = new Image();
-            image.src = './img_pattern.png';
+            image.src = './public/img/img_pattern.png';
             image.addEventListener('load',()=>{
                 let columns = cnvImgGrid.width/widthScaled;
                 let rows = cnvImgGrid.height/heightScaled;
@@ -179,7 +178,7 @@
         if(cnvImgSlicing){
             let ctx = cnvImgSlicing.getContext('2d');
             let image = new Image();
-            image.src = './img_pattern.png';
+            image.src = './public/img/img_pattern.png';
             image.addEventListener('load',()=>{
                 ctx.drawImage(image,100,150,450,380,0,0,500,300);
             });
